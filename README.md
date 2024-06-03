@@ -1,0 +1,1 @@
+curl -i --user drycc:drycc -X POST -F "data=@cmd/filer.go" -F "data=@api/handler.go" 127.0.0.1:8100/aaa/bbb/ccc/ddd
