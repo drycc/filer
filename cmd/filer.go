@@ -20,11 +20,11 @@ func main() {
 	password := flag.String("password", "drycc", "provide a pass for the account")
 
 	flag.Parse()
-	log.Printf("Serving %s on HTTP port: %s\n", *path, *bind)
+	log.Printf("Serving %s on http://%s\n", *path, *bind)
 	timer := time.NewTimer(time.Second * time.Duration(*duration))
 	server := &http.Server{
 		Addr:           *bind,
-		Handler:        api.NewFilerHandler(*username, *password, *bind, *buffsize, *duration, timer),
+		Handler:        api.NewFilerHandler(*username, *password, *path, *buffsize, *duration, timer),
 		ReadTimeout:    10 * time.Second,
 		WriteTimeout:   10 * time.Second,
 		MaxHeaderBytes: 1 << 20,

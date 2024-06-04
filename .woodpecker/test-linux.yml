@@ -1,0 +1,22 @@
+matrix:
+  platform:
+  - linux/amd64
+  - linux/arm64
+
+labels:
+  type: exec
+  platform: ${platform}
+
+steps:
+- name: test-linux
+  image: bash
+  commands:
+  - make test test-cover
+  secrets:
+  - codename
+  - dev_registry
+  - codecov_token
+  when:
+    event:
+    - push
+    - tag
