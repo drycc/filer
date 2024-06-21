@@ -68,6 +68,12 @@ func (filer *FilerHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			http.ServeFile(w, r, name)
 		case http.MethodPost:
 			filer.ServeFile(w, r, name)
+		case http.MethodOptions:
+			w.Header().Set("Server", "drycc-filer")
+			w.Header().Set("Access-Control-Allow-Origin", "*")
+			w.Header().Set("Access-Control-Allow-Methods", "GET,POST")
+			w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
+			w.WriteHeader(http.StatusNoContent)
 		default:
 			http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
 		}
