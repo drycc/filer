@@ -75,7 +75,7 @@ func TestFile(t *testing.T) {
 	}
 	defer res.Body.Close()
 	// test get
-	url := fmt.Sprintf("%s/aaa/bbb/handler_test.go", server.URL)
+	url := fmt.Sprintf("%s/aaa/bbb/handler_test.go?action=get", server.URL)
 	req, err = http.NewRequest("GET", url, nil)
 	req.SetBasicAuth("drycc", "drycc")
 	if err != nil {
@@ -108,5 +108,38 @@ func TestFile(t *testing.T) {
 	}
 	if string(body) != string(expect) {
 		log.Fatalf("expect: %s\r\nactual: %s", string(body), string(expect))
+	}
+	// list dir
+	url = fmt.Sprintf("%s/aaa/bbb?action=list", server.URL)
+	req, err = http.NewRequest("GET", url, nil)
+	req.SetBasicAuth("drycc", "drycc")
+	if err != nil {
+		log.Fatal(err)
+	}
+	res, err = client.Do(req)
+	if err != nil {
+		log.Fatal(err)
+	}
+	body, err = io.ReadAll(res.Body)
+	if err != nil {
+		log.Fatal(err)
+	}
+	if len(body) == 0 {
+		log.Fatal("The size of the returned data is 0")
+	}
+
+	// delete file
+	url = fmt.Sprintf("%s/aaa/bbb/handler_test.go", server.URL)
+	req, err = http.NewRequest("DELETE", url, nil)
+	req.SetBasicAuth("drycc", "drycc")
+	if err != nil {
+		log.Fatal(err)
+	}
+	_, err = client.Do(req)
+	if err != nil {
+		log.Fatal(err)
+	}
+	if _, err := os.Stat("/tmp/aaa/bbb/handler_test.go"); !os.IsNotExist(err) {
+		log.Fatal(err)
 	}
 }
