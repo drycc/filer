@@ -44,16 +44,20 @@ func (filer *FilerHandler) postFile(w http.ResponseWriter, r *http.Request, name
 				http.Error(w, fmt.Sprintf("Upload file error: %v", err), http.StatusBadRequest)
 				return
 			}
+
 			dstFile, err := os.Create(filepath.Join(name, tmpFile.Filename))
 			if err != nil {
 				http.Error(w, fmt.Sprintf("Upload file error: %v", err), http.StatusBadRequest)
 				return
 			}
+			defer dstFile.Close()
+
 			srcFile, err := tmpFile.Open()
 			if err != nil {
 				http.Error(w, fmt.Sprintf("Upload file error: %v", err), http.StatusBadRequest)
 				return
 			}
+			defer srcFile.Close()
 			io.Copy(dstFile, srcFile)
 		}
 	}
