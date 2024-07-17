@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"strings"
 	"time"
 )
 
@@ -75,12 +76,13 @@ func (filer *FilerHandler) listDir(w http.ResponseWriter, name string) {
 
 	if files, err := os.ReadDir(name); err != nil {
 		if f, err := os.Stat(name); err != nil {
-			http.Error(w, fmt.Sprintf("Internal Server Error: %v", err), http.StatusInternalServerError)
+			http.Error(w, fmt.Sprint(err), http.StatusNotFound)
 			return
 		} else if !f.IsDir() {
 			item := make(map[string]string)
 			item["name"] = f.Name()
 			item["type"] = "file"
+			item["path"] = strings.TrimPrefix(name, filer.path)
 			item["size"] = fmt.Sprint(f.Size())
 			item["timestamp"] = f.ModTime().Format(time.RFC3339)
 			result = append(result, item)
@@ -96,6 +98,7 @@ func (filer *FilerHandler) listDir(w http.ResponseWriter, name string) {
 				} else {
 					item["type"] = "file"
 				}
+				item["path"] = filepath.Join(strings.TrimPrefix(name, filer.path), info.Name())
 				item["size"] = fmt.Sprint(info.Size())
 				item["timestamp"] = info.ModTime().Format(time.RFC3339)
 			}
