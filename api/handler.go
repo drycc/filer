@@ -1,3 +1,4 @@
+// Package api provides the HTTP handlers for the filer service.
 package api
 
 import (
@@ -11,11 +12,13 @@ import (
 	"time"
 )
 
+// BasicAuth holds the credentials for basic authentication.
 type BasicAuth struct {
 	username string
 	password string
 }
 
+// FilerHandler handles HTTP requests for the filer service.
 type FilerHandler struct {
 	auth     *BasicAuth
 	path     string
@@ -24,6 +27,7 @@ type FilerHandler struct {
 	duration int64
 }
 
+// NewFilerHandler creates a new FilerHandler with the provided configuration.
 func NewFilerHandler(username, password, path string, buffsize, duration int64, timer *time.Timer) *FilerHandler {
 	return &FilerHandler{
 		auth:     &BasicAuth{username: username, password: password},
