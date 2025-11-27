@@ -15,7 +15,44 @@ We welcome your input! If you have feedback, please [submit an issue][issues]. I
 
 # About
 
-Filer is mainly a file server, with the main function of uploading and downloading files.
+Filer is a specialized wrapper for rclone services with an automatic exit mechanism that provides the following key features:
+
+1. **Start rclone serve**: Launches rclone serve commands with various backends and protocols
+2. **Ping health check**: Provides a `/_/ping` endpoint and automatically exits if no ping requests are received within the specified time period
+
+This tool is specifically designed for rclone file serving scenarios in containerized environments, where automatic cleanup is essential when the service is no longer needed.
+
+## Usage
+
+```bash
+filer [flags] -- rclone serve [rclone args...]
+```
+
+### Flags
+
+- `--interval`: Ping timeout interval, program will exit if no ping requests received within this time (default: 60s)
+- `--bind`: Ping service bind address and port in format host:port (default: 127.0.0.1:8081)
+
+### Examples
+
+```bash
+# Start rclone HTTP server with ping health check (60s timeout, bind to 127.0.0.1:8081)
+filer -- rclone serve http /path/to/files
+
+# Start rclone WebDAV server with custom ping settings
+filer --interval=30s --bind=0.0.0.0:8080 -- rclone serve webdav /path/to/files --addr :8000
+
+# Start rclone FTP server with longer timeout
+filer --interval=300s --bind=:9000 -- rclone serve ftp /path/to/files --addr :2121
+
+# Start rclone with remote storage (e.g., S3)
+filer --interval=120s -- rclone serve http s3:mybucket/folder --addr :8080
+
+# Send ping request to keep service alive
+curl http://127.0.0.1:8081/_/ping
+```
+
+If no ping requests are received within the specified `--interval` time, both the filer wrapper and the rclone service will automatically shut down. This is particularly useful for temporary file sharing scenarios or containerized applications that need automatic cleanup when no longer in use.
 
 # Development
 

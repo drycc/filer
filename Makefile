@@ -14,7 +14,9 @@ PLATFORM ?= linux/amd64,linux/arm64
 # Common flags passed into Go's linker.
 LDFLAGS := "-s -w -X main.version=${VERSION}"
 
-test: test-style test-unit
+test: build test-style test-unit
+	_tests/test.sh
+
 build: podman-build
 
 test-style:
