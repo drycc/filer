@@ -23,10 +23,10 @@ import (
 )
 
 var (
-	pingInterval time.Duration
-	bindAddr     string
-	lastPingTime time.Time
+	bind         string
+	interval     time.Duration
 	pingMutex    sync.RWMutex
+	lastPingTime time.Time
 )
 
 var rootCmd = &cobra.Command{
@@ -42,8 +42,8 @@ Usage examples:
 }
 
 func init() {
-	rootCmd.Flags().StringVar(&bindAddr, "bind", "127.0.0.1:8081", "ping service bind address and port (format: host:port)")
-	rootCmd.Flags().DurationVar(&pingInterval, "interval", 60*time.Second, "ping timeout interval, program will exit if no ping requests received within this time")
+	rootCmd.Flags().StringVar(&bind, "bind", "127.0.0.1:8081", "ping service bind address and port (format: host:port)")
+	rootCmd.Flags().DurationVar(&interval, "interval", 60*time.Second, "ping timeout interval, program will exit if no ping requests received within this time")
 }
 
 func main() {
@@ -112,12 +112,12 @@ func startPingServer() *http.Server {
 	mux.HandleFunc("/_/ping", pingHandler)
 
 	server := &http.Server{
-		Addr:    bindAddr,
+		Addr:    bind,
 		Handler: mux,
 	}
 
 	go func() {
-		log.Printf("ping server started on %s", bindAddr)
+		log.Printf("ping server started on %s", bind)
 		if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 			log.Fatalf("failed to start ping server: %v", err)
 		}
@@ -146,7 +146,7 @@ func getLastPingTime() time.Time {
 }
 
 func pingChecker(ctx context.Context) {
-	ticker := time.NewTicker(pingInterval / 3) // Check frequency is 1/3 of timeout interval
+	ticker := time.NewTicker(interval / 3) // Check frequency is 1/3 of timeout interval
 	defer ticker.Stop()
 
 	for {
@@ -154,8 +154,8 @@ func pingChecker(ctx context.Context) {
 		case <-ctx.Done():
 			return
 		case <-ticker.C:
-			if time.Since(getLastPingTime()) > pingInterval {
-				log.Printf("no ping requests received for %v, program auto-exiting", pingInterval)
+			if time.Since(getLastPingTime()) > interval {
+				log.Printf("no ping requests received for %v, program auto-exiting", interval)
 				// Send SIGTERM signal to self
 				p, _ := os.FindProcess(os.Getpid())
 				_ = p.Signal(syscall.SIGTERM)
